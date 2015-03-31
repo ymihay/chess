@@ -7,39 +7,53 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import utils.Tuple;
+import utils.Utils;
 
-public class Evaluator extends RecursiveTask<Void> {
-	private static ChessBoard board = new ChessBoard(8, 8);
-	private static PositionPredicate positionPredicate = new PositionPredicate(
-			board);
-	private static Set<Map<Integer, ChessFigure>> solutions = new HashSet<Map<Integer, ChessFigure>>();
+public class Evaluator {
+	private ChessBoard chessBoard;
+	private PositionPredicate positionPredicate;
+	private Set<Map<Integer, ChessFigure>> solutions;
 	private static List<ChessFigure> figuresToPut = new ArrayList<ChessFigure>();
+
 	static {
-
-		/*
-		 * figuresToPut.add(ChessFigure.KING);
-		 * figuresToPut.add(ChessFigure.KING);
-		 * figuresToPut.add(ChessFigure.ROOK);
-		 */
-
-		figuresToPut.add(ChessFigure.QUEEN);
-		figuresToPut.add(ChessFigure.QUEEN);
-		figuresToPut.add(ChessFigure.QUEEN);
-		figuresToPut.add(ChessFigure.QUEEN);
-		figuresToPut.add(ChessFigure.QUEEN);
-		figuresToPut.add(ChessFigure.QUEEN);
-		figuresToPut.add(ChessFigure.QUEEN);
-		figuresToPut.add(ChessFigure.QUEEN);
-
+		figuresToPut.add(ChessFigure.KING);
+		figuresToPut.add(ChessFigure.KING);
+		figuresToPut.add(ChessFigure.ROOK);
 	}
 
-	public static void positionTry(List<Integer> board,
+	public Evaluator(int columnCount, int rowCount) {
+		this.chessBoard = new ChessBoard(columnCount, rowCount);
+		this.positionPredicate = new PositionPredicate(chessBoard);
+		this.solutions = new HashSet<Map<Integer, ChessFigure>>();
+		/**
+		 * Need to perform sort of input chess figures for improving
+		 * performance. Amount of possible figure positions free from attacks is
+		 * decreasing after placing all Queens, then Rooks (or Bishops), then
+		 * Kings(or Knights)
+		 */
+		Collections.sort(figuresToPut);
+	}
+
+	public Set<Map<Integer, ChessFigure>> getSolution() {
+		return this.solutions;
+	}
+
+	public ChessBoard getBoard() {
+		return this.chessBoard;
+	}
+
+	public PositionPredicate getPositionPredicate() {
+		return this.positionPredicate;
+	}
+
+	public List<ChessFigure> getFiguresToPut() {
+		return this.figuresToPut;
+	}
+
+	public void positionTry(List<Integer> board,
 			Map<Integer, ChessFigure> chessPositions, int numOfFigureToPut,
 			int prevPosition, ChessFigure prevFigure) {
 
@@ -77,54 +91,14 @@ public class Evaluator extends RecursiveTask<Void> {
 	public static void main(String... args) {
 		long prevTime = System.currentTimeMillis();
 
-		Map<Integer, ChessFigure> chessPositions = new HashMap<Integer, ChessFigure>();
-		/**
-		 * Need to perform sort of input chess figures for improving
-		 * performance. Amount of possible figure positions free from attacks is
-		 * decreasing after placing all Queens, then Rooks (or Bishhops), then
-		 * Kings(or Knights)
-		 */
-		Collections.sort(figuresToPut);
-		positionTry(board.getBoard(), chessPositions, -1, 0, null);
+		Evaluator evaluator = new Evaluator(3, 3);
 
-		printResult();
-		// /new ForkJoinPool().invoke(new Evaluator());
+		evaluator.positionTry(evaluator.getBoard().getBoard(),
+				new HashMap<Integer, ChessFigure>(), -1, 0, null);
+
+		Utils.printResult(evaluator.solutions, evaluator.getBoard());
+
 		long nextTime = System.currentTimeMillis();
 		System.out.println("Time: " + (nextTime - prevTime));
-	}
-
-	public static void printResult() {
-		for (Map<Integer, ChessFigure> map : solutions) {
-			System.out.println(" ");
-			for (Map.Entry<Integer, ChessFigure> entry : map.entrySet()) {
-				Tuple<Integer, Integer> pair = board.getCoordinates(entry
-						.getKey());
-				System.out.println(pair.getX() + ":" + pair.getY() + "/"
-						+ entry.getValue());
-			}
-			System.out.println(" ");
-		}
-
-		System.out.println("Finish! Amount of unique results is "
-				+ solutions.size());
-	}
-
-	@Override
-	protected Void compute() {
-
-		Map<Integer, ChessFigure> chessPositions = new HashMap<Integer, ChessFigure>();
-		positionTry(board.getBoard(), chessPositions, 0, -1, null);
-
-		/*
-		 * for (Integer position : board.getBoard()) { positionTry(
-		 * board.getBoard() .stream()
-		 * .filter(positionPredicate.positionsFreeFromAttack(
-		 * figuresToPut.get(0), position)) .collect(Collectors.toList()), new
-		 * HashMap<Integer, ChessFigure>(chessPositions), 0, position,
-		 * figuresToPut.get(0)); }
-		 */
-		printResult();
-
-		return null;
 	}
 }
