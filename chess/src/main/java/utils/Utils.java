@@ -16,8 +16,8 @@ public class Utils {
 			for (Map.Entry<Integer, ChessFigure> entry : map.entrySet()) {
 				Tuple<Integer, Integer> pair = board.getCoordinates(entry
 						.getKey());
-				System.out.println(pair.getX() + ":" + pair.getY() + "/"
-						+ entry.getValue());
+				System.out.println((pair.getX() + 1) + ":" + (pair.getY() + 1)
+						+ "/" + entry.getValue());
 			}
 		}
 		System.out.println("\nFinish! Amount of unique results is "

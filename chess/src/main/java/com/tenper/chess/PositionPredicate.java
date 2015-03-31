@@ -1,6 +1,5 @@
 package com.tenper.chess;
 
-import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -68,7 +67,10 @@ public class PositionPredicate {
 						/ columnsCount == 2 + p / columnsCount)
 				|| (p == knightPosition - (columnsCount - 2) && knightPosition
 						/ columnsCount == 1 + p / columnsCount)
-				|| (p == knightPosition - (columnsCount + 2))
+				|| (p == knightPosition - (columnsCount + 2)//
+						&& knightPosition
+						/ columnsCount == 1 + p / columnsCount)
+				
 				|| (p == knightPosition + (columnsCount - 2) && 1
 						+ knightPosition / columnsCount == p / columnsCount) || (p == knightPosition
 				+ (columnsCount + 2) && 1 + knightPosition / columnsCount == p
