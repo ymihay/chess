@@ -1,6 +1,7 @@
 package com.tenper.chess;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,6 +12,8 @@ import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import utils.Tuple;
+
 public class Evaluator extends RecursiveTask<Void> {
 	private static ChessBoard board = new ChessBoard(8, 8);
 	private static PositionPredicate positionPredicate = new PositionPredicate(
@@ -18,6 +21,13 @@ public class Evaluator extends RecursiveTask<Void> {
 	private static Set<Map<Integer, ChessFigure>> solutions = new HashSet<Map<Integer, ChessFigure>>();
 	private static List<ChessFigure> figuresToPut = new ArrayList<ChessFigure>();
 	static {
+
+		/*
+		 * figuresToPut.add(ChessFigure.KING);
+		 * figuresToPut.add(ChessFigure.KING);
+		 * figuresToPut.add(ChessFigure.ROOK);
+		 */
+
 		figuresToPut.add(ChessFigure.QUEEN);
 		figuresToPut.add(ChessFigure.QUEEN);
 		figuresToPut.add(ChessFigure.QUEEN);
@@ -26,6 +36,7 @@ public class Evaluator extends RecursiveTask<Void> {
 		figuresToPut.add(ChessFigure.QUEEN);
 		figuresToPut.add(ChessFigure.QUEEN);
 		figuresToPut.add(ChessFigure.QUEEN);
+
 	}
 
 	public static void positionTry(List<Integer> board,
@@ -65,24 +76,37 @@ public class Evaluator extends RecursiveTask<Void> {
 
 	public static void main(String... args) {
 		long prevTime = System.currentTimeMillis();
+
 		Map<Integer, ChessFigure> chessPositions = new HashMap<Integer, ChessFigure>();
-		positionTry(board.getBoard(), chessPositions, 0, -1, null);
+		/**
+		 * Need to perform sort of input chess figures for improving
+		 * performance. Amount of possible figure positions free from attacks is
+		 * decreasing after placing all Queens, then Rooks (or Bishhops), then
+		 * Kings(or Knights)
+		 */
+		Collections.sort(figuresToPut);
+		positionTry(board.getBoard(), chessPositions, -1, 0, null);
+
+		printResult();
 		// /new ForkJoinPool().invoke(new Evaluator());
 		long nextTime = System.currentTimeMillis();
-		System.out.println(nextTime - prevTime);
+		System.out.println("Time: " + (nextTime - prevTime));
 	}
 
 	public static void printResult() {
 		for (Map<Integer, ChessFigure> map : solutions) {
 			System.out.println(" ");
 			for (Map.Entry<Integer, ChessFigure> entry : map.entrySet()) {
-				System.out.println(board.getCoordinates(entry.getKey()) + "/"
+				Tuple<Integer, Integer> pair = board.getCoordinates(entry
+						.getKey());
+				System.out.println(pair.getX() + ":" + pair.getY() + "/"
 						+ entry.getValue());
 			}
 			System.out.println(" ");
 		}
 
-		System.out.println("Finish!" + solutions.size());
+		System.out.println("Finish! Amount of unique results is "
+				+ solutions.size());
 	}
 
 	@Override
@@ -100,6 +124,7 @@ public class Evaluator extends RecursiveTask<Void> {
 		 * figuresToPut.get(0)); }
 		 */
 		printResult();
+
 		return null;
 	}
 }

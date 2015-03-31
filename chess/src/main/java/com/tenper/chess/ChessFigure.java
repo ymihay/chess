@@ -2,7 +2,7 @@ package com.tenper.chess;
 
 public enum ChessFigure {
 
-	QUEEN("Q"), KING("K"), ROOK("R"), BISHOP("B"), KNIGHT("N");
+	QUEEN("Q"), ROOK("R"), BISHOP("B"), KING("K"), KNIGHT("N");
 
 	private final String name;
 
